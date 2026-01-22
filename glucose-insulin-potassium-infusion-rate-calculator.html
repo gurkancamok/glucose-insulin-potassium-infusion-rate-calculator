@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIK Solüsyonu Protokolü ve Hesaplama Aracı (Akordiyon)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2 {
+            color: #004d99;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 8px;
+            margin-top: 25px;
+        }
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 25px 0;
+        }
+
+        /* --- Hesaplama Alanı Stilleri --- */
+        .hesaplayici {
+            background-color: #e6f0ff;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #cce0ff;
+        }
+        .hesaplayici h2 {
+            margin-top: 0;
+            border-bottom: 1px solid #cce0ff;
+            padding-bottom: 10px;
+        }
+        .hesaplayici label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #004d99;
+        }
+        .hesaplayici input[type="number"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #aaccff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .hesaplayici button {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .hesaplayici button:hover {
+            background-color: #1e7e34;
+        }
+        #sonuc {
+            margin-top: 20px;
+            padding: 15px;
+            border: 2px dashed #007bff;
+            border-radius: 8px;
+            background-color: #fff;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            min-height: 50px;
+        }
+        .sonuc-hiz {
+            color: #28a745;
+        }
+        .sonuc-uyari {
+            color: #cc0000;
+        }
+        
+        /* --- HESAPLAMA ARACININ ALTINDAKİ ÖZEL UYARI STİLİ --- */
+        .hesaplayici-alt-uyari {
+            background-color: #fff3cd; 
+            color: #856404; 
+            padding: 10px;
+            border: 1px solid #ffeeba;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-size: 0.9em; 
+            font-weight: normal;
+            text-align: left;
+        }
+        .hesaplayici-alt-uyari strong {
+            color: #856404;
+        }
+        .hesaplayici-alt-uyari hr {
+            border: 0;
+            border-top: 1px dashed #ffeeba;
+            margin: 5px 0;
+        }
+        .hesaplayici-alt-uyari p {
+            margin: 0;
+        }
+
+        /* --- SAYFA SONU HAZIRLAYAN BİLGİSİ STİLİ --- */
+        .hazirlayan-bilgisi {
+            text-align: right;
+            margin-top: 40px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+            color: #555;
+            font-size: 0.8em; 
+            line-height: 1.5;
+        }
+        .hazirlayan-bilgisi strong {
+            display: block;
+            font-size: 1em; 
+            color: #004d99;
+        }
+
+        /* --- Tablo ve Akordiyon Stilleri --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        th { background-color: #f2f2f2; color: #333; }
+        details { border: 1px solid #ddd; border-radius: 6px; margin-bottom: 15px; background-color: #f9f9ff; }
+        summary { font-weight: bold; padding: 15px; cursor: pointer; outline: none; background-color: #e6f0ff; border-radius: 6px; list-style: none; position: relative; color: #004d99; transition: background-color 0.2s; }
+        summary:hover { background-color: #d8e6ff; }
+        summary::after { content: '▶'; position: absolute; right: 15px; transition: transform 0.2s; }
+        details[open] summary::after { content: '▼'; }
+        .protocol-content { padding: 10px 15px 15px 15px; border-top: 1px solid #ddd; }
+        .protocol-content ul { list-style: none; padding-left: 0; }
+        .protocol-content ul li { margin-bottom: 10px; padding-left: 20px; position: relative; }
+        .protocol-content ul li::before { content: '►'; color: #007bff; font-weight: bold; position: absolute; left: 0; }
+        #kaynakca-details summary { background-color: #f2f2f2; color: #333; }
+        #kaynakca-details summary:hover { background-color: #e0e0e0; }
+        .kaynakca-content p { margin: 5px 0; font-size: 0.95em; }
+        .kaynakca-content a { color: #007bff; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>GIK SOLÜSYONU PROTOKOLÜ</h1>
+    
+    <div class="hesaplayici">
+        <h2>GIK İnfüzyon Hızı Hesaplama Aracı</h2>
+        <label for="kanSekeri">Anlık Kan Glukozu Değeri (mg/dl) Giriniz:</label>
+        <input type="number" id="kanSekeri" name="kanSekeri" min="0" placeholder="Örn: 150" required>
+
+        <button onclick="hesaplaInfuzonHizi()">İnfüzyon Hızını Hesapla</button>
+
+        <div id="sonuc">Sonuç burada görünecektir.</div>
+        
+        <div class="hesaplayici-alt-uyari">
+            <p>
+                UYARI: ASM Endokrinoloji Bölümünün önerileriyle hazırlanmıştır. Bu protokol **erişkin hastalar** içindir ve 16 yaş altı pediatrik hastaları kapsamaz. Hekim gerekli gördüğünde protokol dışına çıkabilir.
+            </p>
+            <hr>
+            <p>
+                ÖNEMLİ NOT: GIK SOLÜSYONU Tedavi Protokolü uygulamasında yanlışlık olduğunu düşündüğünüz durumlarda, **Hayati risk** nedeniyle, herhangi bir tereddütte orijinal protokole başvurulması önemlidir.
+            </p>
+        </div>
+    </div>
+
+    <hr>
+    
+    <h2>Kan Şekeri Düzeyine Göre İnfüzyon Hızı Protokol Tablosu</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Kan glukozu (mg/dl)</th>
+                <th>İnfüzyon hızı (ml/saat)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>**≥280**</td><td>**140 ml/saat**</td></tr>
+            <tr><td>279-220</td><td>120 ml/saat</td></tr>
+            <tr><td>219-180</td><td>100 ml/saat</td></tr>
+            <tr><td>179-120</td><td>80 ml/saat</td></tr>
+            <tr><td>119-80</td><td>60 ml/saat</td></tr>
+            <tr><td colspan="2">Kan glukozu **&lt;80** ise infüzyona **2 saat ara verilir**. Sonraki takipte bulunan kan şekeri sonucuna göre başlanır ve protokol uygulanır.</td></tr>
+        </tbody>
+    </table>
+    
+    <hr>
+    
+    <h2>Detaylı Protokol Bilgileri</h2>
+
+    <details>
+        <summary>Hazırlanışı ve Genel Kurallar</summary>
+        <div class="protocol-content">
+            <ul>
+                <li>**Hazırlık:** 500 ml %5 dekstroz + **10 IU kısa etkili insülin** (humulin R) + **10 mmol** (%7.5’luk Potasyum Klorür 1 ampul) ile hazırlanır.</li>
+                <li>**Başlama Zamanı:** Operasyon günü sabah saat **08:00-09:00**’da infüzyona başlanır.</li>
+                <li>**Başlangıç Hızı:** İnfüzyona **100 ml/saat** hızında başlanır.</li>
+                <li>**Yenileme:** **5 saatte bir** solüsyon yenilenir.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>Uygulama Güvenliği</summary>
+        <div class="protocol-content">
+            <ul>
+                <li>İnfüzyon uygulanmaya başlandıktan sonra **24 saatte bir seti ile beraber değiştirilmesi** gerekir.</li>
+                <li>**İnfüzyon pompası** aracılığıyla gönderilmesi gerekir.</li>
+                <li>İnsülin infüzyon setinin üzerine **yüksek riskli ilaç etiketi** yapıştırılarak, sekondor ucundan başka infüzyon gönderilmemesi gerekir.</li>
+                <li>Yüksek riskli ilaç tedavilerinin hazırlanması, uygulanması ve kayıt şahit eşliğinde **“Yüksek Riskli İlaçların Yönetimi ve Güvenli İlaç Kullanım Talimatı”**’ na göre yapılır.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>Hedefler ve Takip</summary>
+        <div class="protocol-content">
+            <ul>
+                <li>**Hedef Kan Şekeri:** Saatlik ölçüm ile başlanır, **100-125 mg/dl** civarında olacak şekilde infüzyon hızı ayarlanır.</li>
+                <li>**Hipoglisemi Riski Yüksek Hastalarda Hedef:** **120-180 mg/dl** olmalıdır.</li>
+                <li>Hasta ağızdan beslenmeye geçilinceye kadar GIK infüzyonuna devam edilir, sonra rutin tedavisine geçilir.</li>
+                <li>İnfüzyona 24 saatten uzun süre devam edilirse **Na+ ve K+ kontrolü** yapılmalıdır.</li>
+                <li>**Önemli Uyarı:** **<80 mg/dl** ve **>280 mg/dl** kan şekerlerinde hekimi bilgilendiriniz.</li>
+            </ul>
+        </div>
+    </details>
+
+    <details id="kaynakca-details">
+        <summary>KAYNAKÇA</summary>
+        <div class="protocol-content kaynakca-content">
+            <p style="margin: 0;">
+                <a href="https://file.temd.org.tr/Uploads/publications/guides/documents/diabetes-mellitus_2022.pdf" target="_blank">
+                    https://file.temd.org.tr/Uploads/publications/guides/documents/diabetes-mellitus_2022.pdf
+                </a> (Türk Endokrinoloji ve Metabolizma Derneği - TEMD)
+            </p>
+        </div>
+    </details>
+
+    <div class="hazirlayan-bilgisi">
+        Hazırlayan: Diyabet Vaka Yöneticisi
+        <strong>Uzm. Hem. Gürkan ÇAMOK</strong>
+    </div>
+
+</div>
+
+<script>
+    /**
+     * GIK Protokolüne göre infüzyon hızını hesaplar ve sonucu ekranda gösterir.
+     */
+    function hesaplaInfuzonHizi() {
+        const kanSekeriInput = document.getElementById('kanSekeri');
+        const sonucDiv = document.getElementById('sonuc');
+        const kanSekeri = parseFloat(kanSekeriInput.value);
+
+        // Giriş Kontrolü
+        if (isNaN(kanSekeri) || kanSekeri < 0 || kanSekeriInput.value.trim() === "") {
+            sonucDiv.innerHTML = '<span class="sonuc-uyari">Lütfen geçerli bir Kan Glukozu (mg/dl) değeri girin.</span>';
+            return;
+        }
+
+        let infuzonHizi = '';
+        let ekUyari = '';
+        let mesajClass = 'sonuc-hiz';
+
+        // Protokole göre hız ayarlaması
+        if (kanSekeri >= 280) {
+            infuzonHizi = '140 ml/saat';
+            mesajClass = 'sonuc-uyari';
+            ekUyari = '<br><b>UYARI: &gt;280 mg/dl! Hekimi DERHAL bilgilendiriniz.</b>';
+        } else if (kanSekeri >= 220) { // 279-220
+            infuzonHizi = '120 ml/saat';
+        } else if (kanSekeri >= 180) { // 219-180
+            infuzonHizi = '100 ml/saat';
+        } else if (kanSekeri >= 120) { // 179-120
+            infuzonHizi = '80 ml/saat';
+        } else if (kanSekeri >= 80) { // 119-80
+            infuzonHizi = '60 ml/saat';
+        } else if (kanSekeri < 80) {
+            infuzonHizi = 'İnfüzyona 2 saat ara verilir.';
+            mesajClass = 'sonuc-uyari';
+            ekUyari = '<br><b>UYARI: &lt;80 mg/dl (Hipoglisemi)! Hekimi DERHAL bilgilendiriniz.</b>';
+        }
+
+        // Sonucu ekrana yazdır
+        sonucDiv.innerHTML = `
+            Kan Glukozu: <b>${kanSekeri} mg/dl</b>
+            <br>
+            Uygulanacak İnfüzyon Hızı: <span class="${mesajClass}">${infuzonHizi}</span>
+            ${ekUyari}
+        `;
+    }
+</script>
+
+</body>
+</html>
